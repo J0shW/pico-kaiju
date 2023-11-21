@@ -128,18 +128,20 @@ function rndGrid(startPos)
 	-- return flr(rnd(range))*8+min
 end
 
-function getBSpawn()
-	--get an x position that is at least 128 pixels from the player
-	local x,y=rndGrid(p_x),rndGrid(p_y)
-	while (abs(x-p_x)<128) do 
-		x=rndGrid(p_x)
-	end
-	while (abs(y-p_y)<128) do
-		y=rndGrid(p_y)
-	end
-	if rnd(1)>0.5 then x*=-1 end
-	if rnd(1)>0.5 then y*=-1 end
-	return {x=x,y=y}
+function randomPointAroundPlayer()
+	local mini, maxi = 128, despawn_distance-128  -- The range of the random number
+    local distance = flr(rnd(maxi - mini + 1)) + mini  -- Random distance within the range
+    
+    -- Calculate the new point coordinates
+    local angle = rnd() -- Random angle between 0 and 1 exclusive
+    local newX = p_x + distance * cos(angle)
+    local newY = p_y + distance * sin(angle)
+
+    -- Ensure newX and newY are multiples of 8
+    newX = flr(newX / 8) * 8
+    newY = flr(newY / 8) * 8
+
+    return {x=newX, y=newY}  -- Return the calculated coordinates
 end
 
 function spawn_buildings()
@@ -148,12 +150,12 @@ function spawn_buildings()
 		local width = 8*9
 		local height = 8*6
 
-		local bspawn = getBSpawn()
+		local bspawn = randomPointAroundPlayer()
 
 		--If there's an overlap, generate a new position until there's no overlap
 		local overlaps = true
 		while overlaps do
-			bspawn = getBSpawn()
+			bspawn = randomPointAroundPlayer()
 			overlaps = false
 	
 			for i=1, #buildings do
